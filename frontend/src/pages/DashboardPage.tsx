@@ -93,12 +93,11 @@ export function DashboardPage() {
 
         {/* ── Tab: Analytics ── */}
         {activeTab === "analytics" && (
-          <div className="tab-content" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="tab-content">
             <div className="analytics-grid">
               <DonutChart bets={bets} />
               <BarChart stats={snailStats} />
             </div>
-            <Standings />
           </div>
         )}
 
