@@ -1,4 +1,4 @@
-# 🐌 SnailBet
+# SnailBet
 
 Sistema web de apuestas en carreras de caracoles con autenticación simulada y pasarela de pago SnailPay.
 
@@ -63,8 +63,6 @@ cd frontend && npm test
 | Vencimiento    | 12/26              |
 | CVV            | 543                |
 | Monto          | Cualquier > $0     |
-
-Para simular **error del sistema**: activar el checkbox "Simular error del sistema (dev)" en el modal de recarga.
 
 ## Seguridad
 
