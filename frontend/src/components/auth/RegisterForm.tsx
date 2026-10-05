@@ -18,7 +18,10 @@ export function RegisterForm() {
     if (!displayName.trim()) return "El nombre es requerido.";
     if (!email.trim()) return "El email es requerido.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Email inválido.";
-    if (password.length < 6) return "La contraseña debe tener mínimo 6 caracteres.";
+    if (password.length < 8) return "La contraseña debe tener mínimo 8 caracteres.";
+    if (!/[A-Z]/.test(password)) return "La contraseña debe incluir al menos una letra mayúscula.";
+    if (!/[a-z]/.test(password)) return "La contraseña debe incluir al menos una letra minúscula.";
+    if (!/\d/.test(password)) return "La contraseña debe contener al menos un número.";
     if (password !== confirm) return "Las contraseñas no coinciden.";
     return null;
   };
@@ -83,10 +86,13 @@ export function RegisterForm() {
           className="form-input"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Mínimo 6 caracteres"
+          placeholder="Mínimo 8 caracteres (A-Z, a-z, 0-9)"
           autoComplete="new-password"
           disabled={isLoading}
         />
+        <span style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4, display: "block" }}>
+          Debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.
+        </span>
       </div>
       <div className="form-group">
         <label htmlFor="register-confirm" className="form-label">Confirmar Contraseña</label>

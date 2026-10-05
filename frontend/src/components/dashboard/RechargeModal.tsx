@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Zap, CheckCircle2, XCircle, AlertTriangle, FlaskConical, Lock, X } from "lucide-react";
+import { Zap, CheckCircle2, XCircle, AlertTriangle, Lock, X } from "lucide-react";
 import { processPayment } from "../../services/payment.service";
 import { useAuth } from "../../context/AuthContext";
 import type { PaymentResponse } from "../../types/payment.types";
@@ -11,6 +11,23 @@ interface RechargeModalProps {
 
 type ModalState = "idle" | "loading" | "success" | "error_rejected" | "error_system";
 
+const PAYMENT_ERROR_MESSAGES: Record<string, string> = {
+  cc_rejected_card_expired: "Tu tarjeta ha vencido. Por favor intenta con una tarjeta vigente.",
+  cc_rejected_bad_cvv: "El código de seguridad (CVV) es incorrecto.",
+  cc_rejected_other_reason: "Tu tarjeta fue rechazada. Verifica los datos o intenta con otra tarjeta.",
+  invalid_card_number: "El número de tarjeta no es válido.",
+  invalid_expiration_format: "La fecha de vencimiento es inválida (debe ser MM/AA).",
+  missing_required_fields: "Por favor completa todos los campos requeridos.",
+  invalid_amount: "El monto a depositar debe ser mayor a $0.",
+  invalid_payer_email: "El correo electrónico no es válido.",
+  internal_server_error: "Hubo un error con el procesador de pagos. No se realizó ningún cargo.",
+};
+
+function formatPaymentError(statusDetail?: string): string {
+  if (!statusDetail) return "La transacción no pudo ser completada. Por favor verifica tus datos.";
+  return PAYMENT_ERROR_MESSAGES[statusDetail] || "La transacción fue rechazada. Por favor verifica los datos de tu tarjeta.";
+}
+
 export function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
   const { session, addBalance } = useAuth();
 
@@ -19,7 +36,6 @@ export function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
   const [cvv, setCvv] = useState("");
   const [cardHolder, setCardHolder] = useState("");
   const [amount, setAmount] = useState("");
-  const [simulateError, setSimulateError] = useState(false);
 
   const [modalState, setModalState] = useState<ModalState>("idle");
   const [response, setResponse] = useState<PaymentResponse | null>(null);
@@ -68,7 +84,7 @@ export function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
           payer_id: session?.userId ?? "",
           payer_email: session?.email ?? "",
         },
-        simulateError
+        false
       );
 
       setResponse(result);
@@ -95,7 +111,6 @@ export function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
     setCvv("");
     setCardHolder("");
     setAmount("");
-    setSimulateError(false);
     onClose();
   };
 
@@ -156,7 +171,7 @@ export function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
               <XCircle style={{ width: 48, height: 48, color: "var(--danger)" }} />
             </div>
             <h3>Transacción Rechazada</h3>
-            <p className="result-detail-code">{response.status_detail}</p>
+            <p className="result-detail-code">{formatPaymentError(response.status_detail)}</p>
             <p className="result-hint">Verifica los datos de tu tarjeta e intenta de nuevo.</p>
             <button id="btn-retry-payment" className="btn btn-secondary btn-full" onClick={() => setModalState("idle")}>
               Intentar de nuevo
@@ -300,19 +315,6 @@ export function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                 {formError}
               </div>
             )}
-
-            <label className="dev-toggle" htmlFor="simulate-error-toggle">
-              <input
-                id="simulate-error-toggle"
-                type="checkbox"
-                checked={simulateError}
-                onChange={(e) => setSimulateError(e.target.checked)}
-                disabled={modalState === "loading"}
-              />
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                <FlaskConical style={{ width: 14, height: 14 }} /> Simular error del sistema (dev)
-              </span>
-            </label>
 
             <button
               id="btn-submit-payment"
