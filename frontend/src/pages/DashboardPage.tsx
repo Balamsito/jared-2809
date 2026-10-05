@@ -4,22 +4,22 @@ import { BalanceCard } from "../components/dashboard/BalanceCard";
 import { DonutChart } from "../components/dashboard/DonutChart";
 import { BarChart } from "../components/dashboard/BarChart";
 import { RechargeModal } from "../components/dashboard/RechargeModal";
-import { RaceLive } from "../components/dashboard/RaceLive";
 import { Standings } from "../components/dashboard/Standings";
+import { SnailRoster } from "../components/dashboard/SnailRoster";
 import { BetHistory } from "../components/dashboard/BetHistory";
 import { generateMockBets, generateSnailWinStats } from "../services/race.service";
 import type { BetRecord, SnailWinStats } from "../types/race.types";
 import { useAuth } from "../context/AuthContext";
-import { Flag, Radio, BarChart3, History } from "lucide-react";
+import { Flag, BarChart3, Trophy, History } from "lucide-react";
 
-type Tab = "live" | "analytics" | "history";
+type Tab = "analytics" | "roster" | "history";
 
 export function DashboardPage() {
   const { session } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [bets, setBets] = useState<BetRecord[]>([]);
   const [snailStats, setSnailStats] = useState<SnailWinStats[]>([]);
-  const [activeTab, setActiveTab] = useState<Tab>("live");
+  const [activeTab, setActiveTab] = useState<Tab>("analytics");
 
   useEffect(() => {
     setBets(generateMockBets());
@@ -37,13 +37,13 @@ export function DashboardPage() {
         {/* ── Welcome ── */}
         <div className="dashboard-welcome">
           <div className="welcome-eyebrow">
-            <div className="badge-live"><span className="badge-live-dot" />En Vivo</div>
+            <div className="badge-live"><span className="badge-live-dot" />Dashboard Oficial</div>
           </div>
           <h2 className="welcome-title" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
             Bienvenido, {session?.displayName}
             <Flag style={{ color: "var(--neon)", width: 22, height: 22 }} />
           </h2>
-          <p className="welcome-subtitle">Derby Nocturno · Ronda 6/6 · Snail Stadium Beta</p>
+          <p className="welcome-subtitle">Derby Nocturno · Monitoreo y Estadísticas Simuladas · Snail Stadium</p>
         </div>
 
         {/* ── Top row: Balance + mini stats ── */}
@@ -74,9 +74,9 @@ export function DashboardPage() {
         {/* ── Tab navigation ── */}
         <div className="tab-nav">
           {([
-            { key: "live", label: "Carrera En Vivo", Icon: Radio },
-            { key: "analytics", label: "Analíticas", Icon: BarChart3 },
-            { key: "history", label: "Historial", Icon: History },
+            { key: "analytics", label: "Analíticas y Gráficas", Icon: BarChart3 },
+            { key: "roster", label: "Competidores Oficiales", Icon: Trophy },
+            { key: "history", label: "Historial de Apuestas", Icon: History },
           ] as { key: Tab; label: string; Icon: React.ComponentType<{ style?: React.CSSProperties }> }[]).map(({ key, label, Icon }) => (
             <button
               key={key}
@@ -91,19 +91,22 @@ export function DashboardPage() {
           ))}
         </div>
 
-        {/* ── Tab: Live Race ── */}
-        {activeTab === "live" && (
-          <div className="tab-content">
-            <RaceLive />
+        {/* ── Tab: Analytics ── */}
+        {activeTab === "analytics" && (
+          <div className="tab-content" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div className="analytics-grid">
+              <DonutChart bets={bets} />
+              <BarChart stats={snailStats} />
+            </div>
             <Standings />
           </div>
         )}
 
-        {/* ── Tab: Analytics ── */}
-        {activeTab === "analytics" && (
-          <div className="analytics-grid">
-            <DonutChart bets={bets} />
-            <BarChart stats={snailStats} />
+        {/* ── Tab: Snail Roster ── */}
+        {activeTab === "roster" && (
+          <div className="tab-content" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <SnailRoster />
+            <Standings />
           </div>
         )}
 
